@@ -1,29 +1,41 @@
-import os
-from google import genai
+name: Daily Article Generation
 
-# GitHub SecretsからAPIキーを安全に読み込む
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
 
-prompt = """
-あなたは23歳の都内一人暮らしOL「みお」です。
-平日は都内で事務職として働き、夜は家でハイボールを飲みながらのんびり過ごしています。
-読者（フォロワー）に親近感を持たせ、秘密を共有しているような距離感で、
-noteに投稿する「今日の日記（400〜600文字程度）」を作成してください。
+permissions:
+  contents: write
 
-【構成】
-- タイトル（日常感のあるリアルな一言）
-- 本文（仕事のちょっとした愚痴や日常の癒やし、夜更かしの気分）
-- 結び（また夜話そうね、といった親密な一言）
-"""
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-# 最新モデルに更新
-response = client.models.generate_content(
-    model="gemini-3.6-flash",
-    contents=prompt,
-)
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-# 生成されたテキストを保存
-with open("latest_diary.txt", "w", encoding="utf-8") as f:
-    f.write(response.text)
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-print("記事の生成が完了しました。")
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install google-genai
+
+    - name: Run script
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python generate_article.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add latest_diary.txt
+        git commit -m "Auto-generate latest diary" || exit 0
+        git push
