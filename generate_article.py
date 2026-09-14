@@ -1,7 +1,7 @@
 import os
 from google import genai
 
-# GitHub Secretsから安全にAPIキーを読み込む（コード上にキーは書きません）
+# GitHub SecretsからAPIキーを安全に読み込む
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 prompt = """
@@ -16,12 +16,13 @@ noteに投稿する「今日の日記（400〜600文字程度）」を作成し�
 - 結び（また夜話そうね、といった親密な一言）
 """
 
+# 最新モデルに更新
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=prompt,
 )
 
-# 生成されたテキストをファイルとして保存
+# 生成されたテキストを保存
 with open("latest_diary.txt", "w", encoding="utf-8") as f:
     f.write(response.text)
 
