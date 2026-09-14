@@ -16,9 +16,9 @@ noteに投稿する「今日の日記（400〜600文字程度）」を作成し�
 - 結び（また夜話そうね、といった親密な一言）
 """
 
-# 最新モデルに更新
+# 推奨されている最新モデルを指定
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     contents=prompt,
 )
 
